@@ -279,6 +279,151 @@ func (c *Client) ExploreReels(amount uint) ([]*Media, error) {
 	return c.reelsTimelineMedia("explore_reels", amount)
 }
 
+// FbSearchItem searches for a specific item via fbsearch endpoint.
+func (c *Client) FbSearchItem(itemID string, searchSurface string, query string) (map[string]any, error) {
+	params := map[string]string{
+		"search_surface": searchSurface,
+		"query":          query,
+	}
+
+	result, err := c.privateRequest(
+		"fbsearch/"+itemID+"/",
+		nil,
+		params,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// FbSearchKeywordTypeahead performs keyword typeahead search.
+func (c *Client) FbSearchKeywordTypeahead(query string) (map[string]any, error) {
+	result, err := c.privateRequest(
+		"fbsearch/keyword_typeahead/",
+		nil,
+		map[string]string{
+			"search_surface": "typeahead_search_page",
+			"query":          query,
+			"context":        "blended",
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// FbSearchTypeaheadStream performs typeahead stream search.
+func (c *Client) FbSearchTypeaheadStream(query string) ([]map[string]any, error) {
+	params := map[string]string{
+		"search_surface":  "typeahead_search_page",
+		"timezone_offset": strconv.Itoa(c.Settings.TimezoneOffset),
+		"query":           query,
+		"context":         "blended",
+	}
+
+	res, err := c.privateRequest(
+		"fbsearch/typeahead_stream/",
+		nil,
+		params,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	rowsArr := navigateJSON(res, "stream_rows")
+	if rowsArr == nil {
+		return nil, nil
+	}
+
+	rowsList, ok := rowsArr.([]any)
+	if !ok {
+		return nil, nil
+	}
+
+	var results []map[string]any
+	for _, row := range rowsList {
+		rowMap, ok := row.(map[string]any)
+		if !ok {
+			continue
+		}
+		usersArr := navigateJSON(rowMap, "users")
+		if usersArr == nil {
+			continue
+		}
+		usersList, ok := usersArr.([]any)
+		if !ok {
+			continue
+		}
+		for _, u := range usersList {
+			userMap, ok := u.(map[string]any)
+			if !ok {
+				continue
+			}
+			results = append(results, userMap)
+		}
+	}
+
+	return results, nil
+}
+
+// FbSearchTypeahead performs typeahead user suggestions.
+func (c *Client) FbSearchTypeahead(query string) ([]map[string]any, error) {
+	params := map[string]string{
+		"search_surface":  "typeahead_search_page",
+		"timezone_offset": strconv.Itoa(c.Settings.TimezoneOffset),
+		"query":           query,
+		"context":         "blended",
+	}
+
+	res, err := c.privateRequest(
+		"fbsearch/typeahead_stream/",
+		nil,
+		params,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	rowsArr := navigateJSON(res, "stream_rows")
+	if rowsArr == nil {
+		return nil, nil
+	}
+
+	rowsList, ok := rowsArr.([]any)
+	if !ok {
+		return nil, nil
+	}
+
+	var results []map[string]any
+	for _, row := range rowsList {
+		rowMap, ok := row.(map[string]any)
+		if !ok {
+			continue
+		}
+		usersArr := navigateJSON(rowMap, "users")
+		if usersArr == nil {
+			continue
+		}
+		usersList, ok := usersArr.([]any)
+		if !ok {
+			continue
+		}
+		for _, u := range usersList {
+			userMap, ok := u.(map[string]any)
+			if !ok {
+				continue
+			}
+			results = append(results, userMap)
+		}
+	}
+
+	return results, nil
+}
+
 // FriendsReels retrieves friends tab reels.
 func (c *Client) FriendsReels(amount uint) ([]*Media, error) {
 	return c.reelsTimelineMedia("friends_reels", amount)

@@ -218,7 +218,9 @@ type StoryBuild struct {
 
 // StoryHashtag is a hashtag sticker in a story.
 type StoryHashtag struct {
-	X, Y, Z  float32 `json:"x,omitempty"`
+	X        float32 `json:"x,omitempty"`
+	Y        float32 `json:"y,omitempty"`
+	Z        float32 `json:"z,omitempty"`
 	Width    float32 `json:"width,omitempty"`
 	Height   float32 `json:"height,omitempty"`
 	Rotation float32 `json:"rotation,omitempty"`
@@ -237,7 +239,9 @@ type StoryMention struct {
 
 // StoryPoll is a poll sticker in a story.
 type StoryPoll struct {
-	X, Y, Z        float32      `json:"x,omitempty"`
+	X              float32      `json:"x,omitempty"`
+	Y              float32      `json:"y,omitempty"`
+	Z              float32      `json:"z,omitempty"`
 	Width          float32      `json:"width,omitempty"`
 	Height         float32      `json:"height,omitempty"`
 	Rotation       float32      `json:"rotation,omitempty"`
@@ -276,7 +280,9 @@ type StoryLocation struct {
 
 // StorySticker is a generic story sticker.
 type StorySticker struct {
-	X, Y, Z  float32        `json:"x,omitempty"`
+	X        float32        `json:"x,omitempty"`
+	Y        float32        `json:"y,omitempty"`
+	Z        float32        `json:"z,omitempty"`
 	Width    float32        `json:"width,omitempty"`
 	Height   float32        `json:"height,omitempty"`
 	Rotation float32        `json:"rotation,omitempty"`

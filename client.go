@@ -45,6 +45,9 @@ type Client struct {
 
 	// Timeline seen posts tracking
 	timelineSeenPosts []string
+
+	// Captcha handler for solving captcha challenges
+	captchaHandler CaptchaHandler
 }
 
 // ClientSettings holds all configurable settings for the client.

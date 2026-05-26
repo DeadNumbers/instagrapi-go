@@ -194,6 +194,102 @@ func (c *Client) AccountSetExternalURL(url string) error {
 	return err
 }
 
+// AccountRemoveBioLinks removes bio links by their IDs.
+func (c *Client) AccountRemoveBioLinks(linkIDs []int64) (map[string]any, error) {
+	ids := make([]string, len(linkIDs))
+	for i, id := range linkIDs {
+		ids[i] = strconv.FormatInt(id, 10)
+	}
+
+	data := map[string]any{
+		"signed_body": "SIGNATURE." + urlEncode(jsonMarshalCompact(map[string]any{
+			"_uid":     strconv.FormatInt(c.UserID, 10),
+			"_uuid":    c.UUID,
+			"link_ids": ids,
+		})),
+	}
+
+	return c.privateRequest(
+		"accounts/remove_bio_links/",
+		data,
+		map[string]string{},
+	)
+}
+
+// AccountChangePicture changes the profile picture.
+func (c *Client) AccountChangePicture(uploadID string) (*UserShort, error) {
+	data := map[string]any{
+		"use_fbuploader": true,
+		"upload_id":      uploadID,
+	}
+	result, err := c.privateRequest(
+		"accounts/change_profile_picture/",
+		c.withDefaultData(data),
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	userData := navigateJSON(result, "user")
+	if userData == nil {
+		return nil, &ClientError{Message: "No user data in response"}
+	}
+
+	return extractUserShortFromMap(userData.(map[string]any))
+}
+
+// NewsInboxV1 retrieves news inbox items.
+func (c *Client) NewsInboxV1(markAsSeen bool) (map[string]any, error) {
+	return c.privateRequest(
+		"news/inbox/",
+		nil,
+		map[string]string{
+			"mark_as_seen": strconv.FormatBool(markAsSeen),
+		},
+	)
+}
+
+// SendConfirmEmail sends a confirmation code to the new email address.
+func (c *Client) SendConfirmEmail(email string) (map[string]any, error) {
+	data := map[string]any{
+		"send_source": "personal_information",
+		"email":       email,
+	}
+	return c.privateRequest(
+		"accounts/send_confirm_email/",
+		c.withDefaultData(data),
+		nil,
+	)
+}
+
+// ConfirmEmail confirms a new email address by code.
+func (c *Client) ConfirmEmail(email string, code string) (map[string]any, error) {
+	data := map[string]any{
+		"email": email,
+		"code":  code,
+	}
+	return c.privateRequest(
+		"accounts/verify_email_code/",
+		c.withDefaultData(data),
+		nil,
+	)
+}
+
+// SendConfirmPhoneNumber sends a confirmation code to the new phone number.
+func (c *Client) SendConfirmPhoneNumber(phoneNumber string) (map[string]any, error) {
+	data := map[string]any{
+		"android_build_type": "release",
+		"send_source":        "edit_profile",
+		"phone_number":       phoneNumber,
+	}
+	return c.privateRequest(
+		"accounts/initiate_phone_number_confirmation/",
+		c.withDefaultData(data),
+		nil,
+	)
+}
+
 // withDefaultData adds default authentication data to a map.
 func (c *Client) withDefaultData(data map[string]any) map[string]any {
 	if data["_uid"] == "" {
